@@ -33,6 +33,7 @@ dependencies:
   # --- UI & Assets ---
   flutter_svg: ^2.0.12       # SVG image support
   cupertino_icons: ^1.0.8    # iOS-style icons
+  google_fonts: ^6.2.1       # Inter and other Google fonts
 
   # --- Utilities ---
   intl: ^0.19.0              # Internationalization, date/number formatting
@@ -44,7 +45,7 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0      # Matches your current SDK (lint rules)
   mockito: ^5.4.5            # Unit test mocking
-  bloc_test: 9.1.7          # BLoC testing utilities
+  bloc_test: ^9.1.7          # BLoC testing utilities
 
 flutter:
   uses-material-design: true

@@ -1,16 +1,70 @@
-# stairdoc
+# StairDOC Delivery Robot Control
 
-A new Flutter project.
+StairDOC is a multi-platform Flutter application that manages authentication and secure access for the StairDoc autonomous stair-climbing delivery robot. The current slice implements a production-grade authentication experience that follows Material Design 3, supports light/dark themes, and integrates with the robot control backend.
+
+## Feature Highlights
+
+- Material 3 compliant UI with teal brand palette, dark/cream backgrounds, and Inter typography via Google Fonts
+- BLoC-driven authentication state (login, registration, logout, forgot password) with form validation and live feedback
+- Dio-based API client with structured error handling and PrettyDioLogger for diagnostics
+- Secure token storage via `flutter_secure_storage` and role/profile caching with `SharedPreferences`
+- GoRouter navigation with auth guards, splash boot flow, and responsive transitions
+- Reusable UI building blocks (`CustomTextField`, `CustomButton`, `LoadingOverlay`) tuned for accessibility and consistent spacing
+
+## Project Structure
+
+```
+lib/
+  models/                // DTOs (User, AuthResponse)
+  providers/auth/        // AuthBloc, events, states
+  routes/                // GoRouter configuration and auth guards
+  screens/               // Splash + Auth + Dashboard screens
+  services/              // API client, AuthService, secure/local storage
+  theme/                 // Material 3 light/dark themes
+  utils/                 // API endpoints, validators, spacing constants
+  widgets/               // Reusable UI components
+```
+
+## Backend Integration
+
+- Base URL: `http://192.168.1.100:8000/api/v1`
+- Endpoints:
+  - `POST /auth/login`
+  - `POST /auth/register`
+  - `POST /auth/forgot-password`
+- Update `lib/utils/api_endpoints.dart` if the backend host or paths change.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. **Install dependencies**
+	```bash
+	flutter pub get
+	```
 
-A few resources to get you started if this is your first Flutter project:
+2. **Configure platform tooling**
+	- Ensure Android/iOS platform requirements are met (Flutter doctor should report no issues).
+	- If targeting physical devices, connect them before running `flutter run`.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. **Run the app**
+	```bash
+	flutter run
+	```
+	The splash screen checks stored credentials and automatically routes to the dashboard or login screen.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+4. **Execute static analysis & tests**
+	```bash
+	flutter analyze
+	flutter test
+	```
+
+## Environment & Secrets
+
+- Tokens are stored with `flutter_secure_storage`; no credentials should be hard-coded.
+- Shared preferences cache the last authenticated user and role to drive quick re-entry.
+- When integrating new environments, expose different base URLs via build-time config or environment variables and update `ApiEndpoints` accordingly.
+
+## Next Steps
+
+- Flesh out the dashboard with live robot telemetry and delivery scheduling flows.
+- Layer in Provider/DI wiring for hardware simulators vs. production services.
+- Expand test coverage: add widget tests for each authentication screen and bloc tests for success/error paths.
