@@ -27,12 +27,15 @@ lib/
 
 ## Backend Integration
 
-- Base URL: `http://192.168.1.100:8000/api/v1`
+- Base URL defaults to `http://192.168.1.100:8000/api/v1`.
 - Endpoints:
   - `POST /auth/login`
   - `POST /auth/register`
   - `POST /auth/forgot-password`
-- Update `lib/utils/api_endpoints.dart` if the backend host or paths change.
+- Override the base URL per build with Dart defines:
+	```bash
+	flutter run --dart-define=API_BASE_URL=https://staging.api.stairdoc.com/api/v1
+	```
 
 ## Getting Started
 
@@ -61,7 +64,18 @@ lib/
 
 - Tokens are stored with `flutter_secure_storage`; no credentials should be hard-coded.
 - Shared preferences cache the last authenticated user and role to drive quick re-entry.
-- When integrating new environments, expose different base URLs via build-time config or environment variables and update `ApiEndpoints` accordingly.
+	- Mock authentication is available for development to bypass backend dependencies:
+		```bash
+		flutter run \
+			--dart-define=ENABLE_MOCK_AUTH=true \
+			--dart-define=MOCK_EMAIL=operator@stairdoc.dev \
+			--dart-define=MOCK_PASSWORD=Password123! \
+			--dart-define=MOCK_NAME="Dev Operator" \
+			--dart-define=MOCK_ROLE=operator
+		```
+		* Sign in with the supplied mock credentials to land on the dashboard instantly.
+		* Adjust `MOCK_AUTH_LATENCY_MS` to emulate slower connections, or omit the defines to fall back to the real backend.
+	- When integrating new environments, prefer Dart defines for URLs/secrets instead of editing source files directly.
 
 ## Next Steps
 
