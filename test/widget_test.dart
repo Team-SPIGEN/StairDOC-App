@@ -27,6 +27,12 @@ void main() {
     expect(find.text('Delivery Robot Control'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.textContaining('secure document deliveries'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'autonomous stair-climbing deliveries',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
   });
 }

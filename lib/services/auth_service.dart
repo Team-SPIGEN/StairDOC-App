@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 
 import '../models/auth_response.dart';
+import '../models/user.dart';
 import '../utils/api_endpoints.dart';
+import '../utils/app_config.dart';
 import 'api_client.dart';
 
 class AuthException implements Exception {
@@ -15,14 +19,20 @@ class AuthException implements Exception {
 }
 
 class AuthService {
-  AuthService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  AuthService({ApiClient? apiClient, bool? enableMockAuth})
+    : _apiClient = apiClient ?? ApiClient(),
+      _useMockAuth = enableMockAuth ?? AppConfig.enableMockAuth;
 
   final ApiClient _apiClient;
+  final bool _useMockAuth;
 
   Future<AuthResponse> login({
     required String email,
     required String password,
   }) async {
+    if (_useMockAuth) {
+      return _mockLogin(email: email, password: password);
+    }
     try {
       final response = await _apiClient.dio.post(
         ApiEndpoints.login,
@@ -46,6 +56,15 @@ class AuthService {
     required String role,
     String? phone,
   }) async {
+    if (_useMockAuth) {
+      return _mockRegister(
+        name: name,
+        email: email,
+        password: password,
+        role: role,
+        phone: phone,
+      );
+    }
     try {
       final response = await _apiClient.dio.post(
         ApiEndpoints.register,
@@ -69,6 +88,9 @@ class AuthService {
   }
 
   Future<String> forgotPassword({required String email}) async {
+    if (_useMockAuth) {
+      return _mockForgotPassword(email: email);
+    }
     try {
       final response = await _apiClient.dio.post(
         ApiEndpoints.forgotPassword,
@@ -143,5 +165,63 @@ class AuthService {
       'Something went wrong. Please try again later.',
       code: 'unknown-error',
     );
+  }
+
+  Future<AuthResponse> _mockLogin({
+    required String email,
+    required String password,
+  }) async {
+    await _simulateLatency();
+    final normalizedEmail = email.trim().toLowerCase();
+    final normalizedPassword = password.trim();
+
+    if (normalizedEmail == AppConfig.mockEmail.toLowerCase() &&
+        normalizedPassword == AppConfig.mockPassword) {
+      return AuthResponse(
+        token: AppConfig.buildMockToken(),
+        user: User.fromJson(AppConfig.mockUserJson),
+      );
+    }
+
+    throw AuthException(
+      'Invalid email or password. Please try again.',
+      code: 'invalid-credentials',
+    );
+  }
+
+  Future<AuthResponse> _mockRegister({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    String? phone,
+  }) async {
+    await _simulateLatency();
+    final user = User(
+      id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
+      name: name.isEmpty ? AppConfig.mockName : name,
+      email: email.isEmpty ? AppConfig.mockEmail : email,
+      role: role.isEmpty ? AppConfig.mockRole : role,
+      phone: phone,
+    );
+
+    return AuthResponse(token: AppConfig.buildMockToken(), user: user);
+  }
+
+  Future<String> _mockForgotPassword({required String email}) async {
+    await _simulateLatency();
+    if (email.trim().isEmpty) {
+      throw AuthException('Email is required.', code: 'validation-error');
+    }
+    return 'A reset link for $email has been prepared (mock).';
+  }
+
+  Future<void> _simulateLatency() async {
+    final delay = Duration(
+      milliseconds: AppConfig.mockLatencyMs.clamp(0, 2000),
+    );
+    if (delay.inMilliseconds > 0) {
+      await Future<void>.delayed(delay);
+    }
   }
 }
