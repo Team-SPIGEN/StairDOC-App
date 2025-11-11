@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   const AppColors._();
@@ -31,9 +30,10 @@ class AppTheme {
           error: AppColors.error,
         );
 
-    final textTheme = GoogleFonts.interTextTheme(
-      ThemeData(brightness: Brightness.light).textTheme,
-    ).apply(bodyColor: AppColors.lightText, displayColor: AppColors.lightText);
+    final textTheme = Typography.material2021().black.apply(
+      bodyColor: AppColors.lightText,
+      displayColor: AppColors.lightText,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -85,9 +85,10 @@ class AppTheme {
           error: AppColors.error,
         );
 
-    final textTheme = GoogleFonts.interTextTheme(
-      ThemeData(brightness: Brightness.dark).textTheme,
-    ).apply(bodyColor: AppColors.darkText, displayColor: AppColors.darkText);
+    final textTheme = Typography.material2021().white.apply(
+      bodyColor: AppColors.darkText,
+      displayColor: AppColors.darkText,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -167,7 +168,7 @@ class AppTheme {
       style: FilledButton.styleFrom(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
-        minimumSize: const Size.fromHeight(48),
+        minimumSize: const Size(0, 48),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -179,7 +180,7 @@ class AppTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.primary, width: 1.5),
-        minimumSize: const Size.fromHeight(48),
+        minimumSize: const Size(0, 48),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
