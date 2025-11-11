@@ -12,40 +12,43 @@ dependencies:
     sdk: flutter
 
   # --- State Management ---
-  flutter_bloc: ^8.1.6       # Core BLoC + Flutter integration
-  bloc: ^8.1.3               # Core BLoC library
+  flutter_bloc: ^9.1.1       # Core BLoC + Flutter integration
+  bloc: ^9.1.0               # Core BLoC library
   equatable: ^2.0.7          # Simplifies state comparisons
 
   # --- Dependency Injection ---
-  get_it: ^7.7.0             # Lightweight service locator
+  get_it: ^9.0.5             # Lightweight service locator
 
   # --- Networking ---
   dio: ^5.4.2                # Powerful HTTP client
   pretty_dio_logger: ^1.4.0  # Logging for Dio requests
+
+  # --- Realtime ---
+  web_socket_channel: ^2.4.5  # WebSocket stream for robot telemetry
+  multicast_dns: ^0.3.2       # mDNS discovery for robot controllers
 
   # --- Local Storage ---
   shared_preferences: ^2.3.3     # Simple key-value storage
   flutter_secure_storage: ^9.2.2 # Encrypted local storage (for tokens etc.)
 
   # --- Navigation ---
-  go_router: ^14.1.0         # Declarative routing and navigation
+  go_router: ^17.0.0         # Declarative routing and navigation
 
   # --- UI & Assets ---
   flutter_svg: ^2.0.12       # SVG image support
   cupertino_icons: ^1.0.8    # iOS-style icons
-  google_fonts: ^6.2.1       # Inter and other Google fonts
 
   # --- Utilities ---
-  intl: ^0.19.0              # Internationalization, date/number formatting
+  intl: ^0.20.2              # Internationalization, date/number formatting
   logger: ^2.2.0             # Simple logging utility
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0      # Matches your current SDK (lint rules)
-  mockito: ^5.4.5            # Unit test mocking
-  bloc_test: ^9.1.7          # BLoC testing utilities
+  flutter_lints: ^6.0.0      # Matches your current SDK (lint rules)
+  mockito: ^5.5.0            # Unit test mocking
+  bloc_test: ^10.0.0         # BLoC testing utilities
 
 flutter:
   uses-material-design: true

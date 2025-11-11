@@ -31,6 +31,58 @@
 
   <title>stairdoc</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    (function configureFlutterRenderer() {
+      const flutterGlobal = window._flutter ??= {};
+
+      const wrapLoader = (loader) => {
+        if (!loader || typeof loader.load !== 'function' || loader.__stairdocPatched) {
+          return loader;
+        }
+
+        const originalLoad = loader.load.bind(loader);
+        loader.load = function stairdocLoad(options = {}) {
+          const buildConfig = window._flutter?.buildConfig;
+          const builds = Array.isArray(buildConfig?.builds) ? buildConfig.builds : [];
+          const hasHtmlBuild = builds.some((build) => build && build.renderer === 'html');
+
+          if (!hasHtmlBuild) {
+            return originalLoad(options);
+          }
+
+          const incomingConfig = options.config ?? {};
+          const mergedConfig = {
+            renderer: incomingConfig.renderer ?? 'html',
+            ...incomingConfig,
+          };
+
+          return originalLoad({
+            ...options,
+            config: mergedConfig,
+          });
+        };
+
+        Object.defineProperty(loader, '__stairdocPatched', {
+          value: true,
+          configurable: false,
+        });
+
+        return loader;
+      };
+
+      let currentLoader = wrapLoader(flutterGlobal.loader);
+
+      Object.defineProperty(flutterGlobal, 'loader', {
+        configurable: true,
+        get() {
+          return currentLoader;
+        },
+        set(value) {
+          currentLoader = wrapLoader(value);
+        },
+      });
+    }());
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

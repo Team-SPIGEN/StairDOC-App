@@ -8,7 +8,8 @@ import '../providers/auth/auth_state.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
-import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/main_page.dart';
+import '../screens/robot/robot_controller_page.dart';
 import '../screens/splash/splash_screen.dart';
 
 class AppRouter {
@@ -40,7 +41,12 @@ class AppRouter {
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
-            builder: (context, state) => const DashboardScreen(),
+            builder: (context, state) => const MainPage(),
+          ),
+          GoRoute(
+            path: '/robot-controls',
+            name: 'robot-controls',
+            builder: (context, state) => const RobotControllerPage(),
           ),
         ],
         redirect: (context, state) {
