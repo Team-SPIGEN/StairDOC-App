@@ -1,84 +1,51 @@
-# StairDOC Delivery Robot Control
+# StairDOC Monorepo
 
-StairDOC is a multi-platform Flutter application that manages authentication and secure access for the StairDoc autonomous stair-climbing delivery robot. The current slice implements a production-grade authentication experience that follows Material Design 3, supports light/dark themes, and integrates with the robot control backend.
+This repository houses both the Flutter mobile controller and the FastAPI backend that power the StairDOC autonomous stair-climbing delivery robot. The codebase now follows a structured monorepo layout so each surface can evolve independently while sharing documentation, automation, and release workflows.
 
-## Feature Highlights
-
-- Material 3 compliant UI with teal brand palette, dark/cream backgrounds, and Inter typography via Google Fonts
-- BLoC-driven authentication state (login, registration, logout, forgot password) with form validation and live feedback
-- Dio-based API client with structured error handling and PrettyDioLogger for diagnostics
-- Secure token storage via `flutter_secure_storage` and role/profile caching with `SharedPreferences`
-- GoRouter navigation with auth guards, splash boot flow, and responsive transitions
-- Reusable UI building blocks (`CustomTextField`, `CustomButton`, `LoadingOverlay`) tuned for accessibility and consistent spacing
-
-## Project Structure
+## Repository Layout
 
 ```
-lib/
-  models/                // DTOs (User, AuthResponse)
-  providers/auth/        // AuthBloc, events, states
-  routes/                // GoRouter configuration and auth guards
-  screens/               // Splash + Auth + Dashboard screens
-  services/              // API client, AuthService, secure/local storage
-  theme/                 // Material 3 light/dark themes
-  utils/                 // API endpoints, validators, spacing constants
-  widgets/               // Reusable UI components
+apps/
+  mobile/          # Flutter application (Android, iOS, desktop, web)
+services/
+  api/             # FastAPI + SQLModel backend service
+packages/          # Reserved for future shared packages (Dart/Python)
+infra/             # Infrastructure-as-code, docker-compose, deployment scripts
+scripts/           # Cross-project helper scripts and tooling
+docs/              # Architecture notes, runbooks, API references
 ```
-
-## Backend Integration
-
-- Base URL defaults to `http://192.168.1.100:8000/api/v1`.
-- Endpoints:
-  - `POST /auth/login`
-  - `POST /auth/register`
-  - `POST /auth/forgot-password`
-- Override the base URL per build with Dart defines:
-	```bash
-	flutter run --dart-define=API_BASE_URL=https://staging.api.stairdoc.com/api/v1
-	```
 
 ## Getting Started
 
-1. **Install dependencies**
-	```bash
-	flutter pub get
-	```
+### Prerequisites
+- Flutter 3.x with required platform toolchains (`flutter doctor` should report no issues).
+- Python 3.11+ for the backend along with a virtual environment manager (venv, uv, poetry, etc.).
 
-2. **Configure platform tooling**
-	- Ensure Android/iOS platform requirements are met (Flutter doctor should report no issues).
-	- If targeting physical devices, connect them before running `flutter run`.
+### Mobile App (`apps/mobile`)
+```bash
+cd apps/mobile
+flutter pub get
+flutter run  # add --dart-define flags for environment overrides
+flutter analyze
+flutter test
+```
+Refer to `apps/mobile/README.md` for feature-level details, environment variables, and mock auth instructions.
 
-3. **Run the app**
-	```bash
-	flutter run
-	```
-	The splash screen checks stored credentials and automatically routes to the dashboard or login screen.
+### Backend API (`services/api`)
+```bash
+cd services/api
+python -m venv .venv
+. .venv/Scripts/activate       # PowerShell: .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env           # or use your secret manager
+uvicorn app.main:app --reload
+```
+See `services/api/README.md` for route descriptions, environment variables, and deployment notes.
 
-4. **Execute static analysis & tests**
-	```bash
-	flutter analyze
-	flutter test
-	```
+## Workflow Tips
+- Keep Flutter- and backend-specific dependencies inside their respective folders; avoid installing tooling at the repo root.
+- Add unit/widget tests next to the code they validate (`apps/mobile/test`, `services/api/tests`).
+- Use the `infra/` folder for Docker, CI scripts, and infrastructure definitions so deployments stay discoverable.
+- Document shared decisions inside `docs/` and update this README when the layout evolves.
 
-## Environment & Secrets
-
-- Tokens are stored with `flutter_secure_storage`; no credentials should be hard-coded.
-- Shared preferences cache the last authenticated user and role to drive quick re-entry.
-	- Mock authentication is available for development to bypass backend dependencies:
-		```bash
-		flutter run \
-			--dart-define=ENABLE_MOCK_AUTH=true \
-			--dart-define=MOCK_EMAIL=operator@stairdoc.dev \
-			--dart-define=MOCK_PASSWORD=Password123! \
-			--dart-define=MOCK_NAME="Dev Operator" \
-			--dart-define=MOCK_ROLE=operator
-		```
-		* Sign in with the supplied mock credentials to land on the dashboard instantly.
-		* Adjust `MOCK_AUTH_LATENCY_MS` to emulate slower connections, or omit the defines to fall back to the real backend.
-	- When integrating new environments, prefer Dart defines for URLs/secrets instead of editing source files directly.
-
-## Next Steps
-
-- Flesh out the dashboard with live robot telemetry and delivery scheduling flows.
-- Layer in Provider/DI wiring for hardware simulators vs. production services.
-- Expand test coverage: add widget tests for each authentication screen and bloc tests for success/error paths.
+With this structure, future services (e.g., telemetry ingestion, simulation harnesses) can join the monorepo under `services/` while still sharing automation.

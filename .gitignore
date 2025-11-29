@@ -26,12 +26,14 @@ migrate_working_dir/
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
+/apps/mobile/.dart_tool/
+/apps/mobile/.flutter-plugins-dependencies
+/apps/mobile/.flutter-plugins
+/apps/mobile/.pub-cache/
+/apps/mobile/.pub/
+/apps/mobile/build/
+/apps/mobile/coverage/
+/apps/mobile/.metadata
 
 # Symbolication related
 app.*.symbols
@@ -40,6 +42,17 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+/apps/mobile/android/app/debug
+/apps/mobile/android/app/profile
+/apps/mobile/android/app/release
+
+# Backend virtualenvs + caches
+/.venv/
+/services/api/.venv/
+/services/api/__pycache__/
+/services/api/.mypy_cache/
+
+# Backend runtime files
+/services/api/.env
+/services/api/stairdoc.db
+/services/api/.coverage
