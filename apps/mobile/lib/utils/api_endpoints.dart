@@ -30,6 +30,15 @@ class ApiEndpoints {
   static const String voiceFeedback = '/voice/command/feedback';
   static const String voiceCapabilities = '/voice/capabilities';
 
+  // Notification endpoints
+  static const String notifications = '/notifications';
+  static const String notificationUnreadCount = '/notifications/unread-count';
+  static const String notificationStats = '/notifications/stats';
+  static const String notificationReadAll = '/notifications/read-all';
+  static const String notificationPreferences = '/notifications/preferences';
+  static const String notificationPushToken = '/notifications/push-token';
+  static const String notificationTest = '/notifications/test';
+
   static String resolve(String path) => '$baseUrl$path';
 
   static Uri robotStatusSocketUri() => Uri.parse(robotSocketUrl);
@@ -40,5 +49,10 @@ class ApiEndpoints {
       return base.replace(queryParameters: {'robot_id': robotId});
     }
     return base;
+  }
+
+  /// WebSocket URI for real-time notifications.
+  static Uri notificationSocketUri(String userId) {
+    return Uri.parse('$wsBaseUrl/../notifications/ws/$userId');
   }
 }

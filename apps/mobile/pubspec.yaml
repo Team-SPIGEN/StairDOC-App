@@ -21,6 +21,7 @@ dependencies:
 
   # --- Networking ---
   dio: ^5.4.2                # Powerful HTTP client
+  http: ^1.2.0               # Lightweight HTTP client
   pretty_dio_logger: ^1.4.0  # Logging for Dio requests
 
   # --- Realtime ---

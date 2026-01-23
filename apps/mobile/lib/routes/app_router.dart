@@ -11,6 +11,7 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/delivery/delivery_queue_screen.dart';
 import '../screens/main_page.dart';
+import '../screens/notification/notification_center_screen.dart';
 import '../screens/robot/robot_controller_page.dart';
 import '../screens/robot/robot_vitals_screen.dart';
 import '../screens/splash/splash_screen.dart';
@@ -71,6 +72,11 @@ class AppRouter {
             path: '/voice-control',
             name: 'voice-control',
             builder: (context, state) => const VoiceControlScreen(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            name: 'notifications',
+            builder: (context, state) => const NotificationCenterScreen(),
           ),
         ],
         redirect: (context, state) {

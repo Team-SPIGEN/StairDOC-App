@@ -5,11 +5,32 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth/auth_bloc.dart';
 import '../providers/auth/auth_event.dart';
 import '../providers/auth/auth_state.dart';
+import '../providers/notification/notification_cubit.dart';
 import '../utils/ui_constants.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/notification/notification_badge.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize notifications when page loads
+    _initNotifications();
+  }
+
+  void _initNotifications() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<NotificationCubit>().initialize(authState.user.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +41,9 @@ class MainPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Robot Dashboard'),
         actions: [
+          NotificationIconButton(
+            onPressed: () => context.push('/notifications'),
+          ),
           IconButton(
             tooltip: 'Robot Controls',
             icon: const Icon(Icons.tune_rounded),
@@ -134,6 +158,10 @@ class MainPage extends StatelessWidget {
                               _DashboardPill(
                                 label: 'Voice control',
                                 onTap: () => context.push('/voice-control'),
+                              ),
+                              _DashboardPill(
+                                label: 'Notifications',
+                                onTap: () => context.push('/notifications'),
                               ),
                             ],
                           ),
