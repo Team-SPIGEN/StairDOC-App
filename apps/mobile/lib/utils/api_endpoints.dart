@@ -25,6 +25,11 @@ class ApiEndpoints {
   static const String robotStatus = '/robot/status';
   static const String robotDiscovery = '/robot/discovery';
 
+  // Voice endpoints
+  static const String voiceCommand = '/voice/command';
+  static const String voiceFeedback = '/voice/command/feedback';
+  static const String voiceCapabilities = '/voice/capabilities';
+
   static String resolve(String path) => '$baseUrl$path';
 
   static Uri robotStatusSocketUri() => Uri.parse(robotSocketUrl);
