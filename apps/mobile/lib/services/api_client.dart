@@ -3,6 +3,10 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../utils/api_endpoints.dart';
 
+/// Centralized HTTP client for all API communication.
+///
+/// Configures Dio with base URL, timeouts, headers, and request/response logging.
+/// All service classes should use this client for consistent behavior.
 class ApiClient {
   ApiClient({Dio? dio}) : _dio = dio ?? Dio(_baseOptions) {
     _dio.interceptors.add(
@@ -32,5 +36,6 @@ class ApiClient {
     validateStatus: (status) => status != null && status < 600,
   );
 
+  /// The underlying Dio instance for making HTTP requests.
   Dio get dio => _dio;
 }
