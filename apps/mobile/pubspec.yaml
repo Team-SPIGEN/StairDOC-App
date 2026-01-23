@@ -24,8 +24,12 @@ dependencies:
   pretty_dio_logger: ^1.4.0  # Logging for Dio requests
 
   # --- Realtime ---
-  web_socket_channel: ^2.4.5  # WebSocket stream for robot telemetry
+  web_socket_channel: ^3.0.3  # WebSocket stream for robot telemetry
   multicast_dns: ^0.3.2       # mDNS discovery for robot controllers
+
+  # --- Voice ---
+  speech_to_text: ^7.0.0      # Speech recognition
+  flutter_tts: ^4.2.0         # Text-to-speech
 
   # --- Local Storage ---
   shared_preferences: ^2.3.3     # Simple key-value storage
