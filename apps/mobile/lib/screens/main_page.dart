@@ -23,7 +23,7 @@ class MainPage extends StatelessWidget {
           IconButton(
             tooltip: 'Robot Controls',
             icon: const Icon(Icons.tune_rounded),
-            onPressed: () => context.go('/robot-controls'),
+            onPressed: () => context.push('/robot-controls'),
           ),
           IconButton(
             tooltip: 'Log out',
@@ -118,11 +118,23 @@ class MainPage extends StatelessWidget {
                           Wrap(
                             spacing: Insets.sm,
                             runSpacing: Insets.sm,
-                            children: const [
-                              _DashboardPill(label: 'Robot vitals'),
-                              _DashboardPill(label: 'Delivery queue'),
-                              _DashboardPill(label: 'Access logs'),
-                              _DashboardPill(label: 'Voice control'),
+                            children: [
+                              _DashboardPill(
+                                label: 'Robot vitals',
+                                onTap: () => context.push('/robot-vitals'),
+                              ),
+                              _DashboardPill(
+                                label: 'Delivery queue',
+                                onTap: () => context.push('/delivery-queue'),
+                              ),
+                              _DashboardPill(
+                                label: 'Access logs',
+                                onTap: () => context.push('/access-logs'),
+                              ),
+                              _DashboardPill(
+                                label: 'Voice control',
+                                onTap: () => context.push('/voice-control'),
+                              ),
                             ],
                           ),
                         ],
@@ -131,7 +143,7 @@ class MainPage extends StatelessWidget {
                     const Spacer(),
                     CustomButton(
                       label: 'Robot Controls',
-                      onPressed: () => context.go('/robot-controls'),
+                      onPressed: () => context.push('/robot-controls'),
                     ),
                     const SizedBox(height: Insets.sm),
                     CustomButton(
@@ -162,24 +174,35 @@ class MainPage extends StatelessWidget {
 }
 
 class _DashboardPill extends StatelessWidget {
-  const _DashboardPill({required this.label});
+  const _DashboardPill({required this.label, this.onTap});
 
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Insets.sm, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.12),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: colorScheme.primary,
-          fontWeight: FontWeight.w600,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Insets.sm,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: colorScheme.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
