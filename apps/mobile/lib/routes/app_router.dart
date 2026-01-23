@@ -5,12 +5,16 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/auth/auth_bloc.dart';
 import '../providers/auth/auth_state.dart';
+import '../screens/access/access_logs_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/delivery/delivery_queue_screen.dart';
 import '../screens/main_page.dart';
 import '../screens/robot/robot_controller_page.dart';
+import '../screens/robot/robot_vitals_screen.dart';
 import '../screens/splash/splash_screen.dart';
+import '../screens/voice/voice_control_screen.dart';
 
 class AppRouter {
   AppRouter(this.authBloc)
@@ -47,6 +51,26 @@ class AppRouter {
             path: '/robot-controls',
             name: 'robot-controls',
             builder: (context, state) => const RobotControllerPage(),
+          ),
+          GoRoute(
+            path: '/robot-vitals',
+            name: 'robot-vitals',
+            builder: (context, state) => const RobotVitalsScreen(),
+          ),
+          GoRoute(
+            path: '/delivery-queue',
+            name: 'delivery-queue',
+            builder: (context, state) => const DeliveryQueueScreen(),
+          ),
+          GoRoute(
+            path: '/access-logs',
+            name: 'access-logs',
+            builder: (context, state) => const AccessLogsScreen(),
+          ),
+          GoRoute(
+            path: '/voice-control',
+            name: 'voice-control',
+            builder: (context, state) => const VoiceControlScreen(),
           ),
         ],
         redirect: (context, state) {
