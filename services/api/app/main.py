@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import access, auth, delivery, health, robot
+from .api import access, auth, delivery, health, robot, websocket
 from .core.config import get_settings
 from .core.database import init_db
 
@@ -28,3 +28,4 @@ app.include_router(auth.router, prefix=settings.api_v1_prefix)
 app.include_router(robot.router, prefix=settings.api_v1_prefix)
 app.include_router(delivery.router, prefix=settings.api_v1_prefix)
 app.include_router(access.router, prefix=settings.api_v1_prefix)
+app.include_router(websocket.router, prefix=settings.api_v1_prefix)
