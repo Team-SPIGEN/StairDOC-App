@@ -11,6 +11,13 @@ _engine: AsyncEngine = create_async_engine(_settings.database_url, echo=False)
 
 
 async def init_db() -> None:
+    # Import all models to ensure they are registered with SQLModel metadata
+    # Import order matters for foreign key resolution
+    from ..models.user import User  # noqa: F401
+    from ..models.robot_unit import RobotUnit  # noqa: F401
+    from ..models.delivery_job import DeliveryJob  # noqa: F401
+    from ..models.access_log import AccessLog  # noqa: F401
+    
     async with _engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

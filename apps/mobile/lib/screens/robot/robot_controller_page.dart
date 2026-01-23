@@ -4,8 +4,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../providers/access_control/access_control_cubit.dart';
 import '../../providers/robot_controller/robot_controller_cubit.dart';
 import '../../providers/robot_controller/robot_controller_state.dart';
+import '../../services/container_access_service.dart';
 import '../../services/robot_api_service.dart';
 import '../../services/robot_discovery_service.dart';
 import '../../utils/ui_constants.dart';
@@ -17,17 +19,27 @@ import '../../widgets/robot/robot_widgets.dart';
 /// - Connection status and telemetry display
 /// - Device picker for selecting available robots
 /// - Directional pad for sending movement commands
+/// - Container lock/unlock controls
 /// - Emergency stop functionality
 class RobotControllerPage extends StatelessWidget {
   const RobotControllerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => RobotControllerCubit(
-        robotApiService: RobotApiService(),
-        discoveryService: RobotDiscoveryService(),
-      )..initialize(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => RobotControllerCubit(
+            robotApiService: RobotApiService(),
+            discoveryService: RobotDiscoveryService(),
+          )..initialize(),
+        ),
+        BlocProvider(
+          create: (_) => AccessControlCubit(
+            containerAccessService: ContainerAccessService(),
+          )..initialize(),
+        ),
+      ],
       child: const _RobotControllerView(),
     );
   }
@@ -77,6 +89,8 @@ class _RobotControllerView extends StatelessWidget {
                       ConnectionStatusCard(
                         onManageDevices: () => _showDevicePicker(context),
                       ),
+                      const SizedBox(height: Insets.md),
+                      const ContainerControlCard(),
                       const SizedBox(height: Insets.lg),
                       LayoutBuilder(
                         builder: (context, constraints) {
