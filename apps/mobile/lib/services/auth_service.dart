@@ -8,16 +8,27 @@ import '../utils/api_endpoints.dart';
 import '../utils/app_config.dart';
 import 'api_client.dart';
 
+/// Exception thrown when authentication operations fail.
 class AuthException implements Exception {
   AuthException(this.message, {this.code});
 
+  /// Human-readable error message.
   final String message;
+
+  /// Optional error code for programmatic handling.
   final String? code;
 
   @override
   String toString() => 'AuthException(code: $code, message: $message)';
 }
 
+/// Service handling all authentication operations.
+///
+/// Supports:
+/// - User login with email/password
+/// - New user registration
+/// - Password reset requests
+/// - Mock authentication for development (via [AppConfig.enableMockAuth])
 class AuthService {
   AuthService({ApiClient? apiClient, bool? enableMockAuth})
     : _apiClient = apiClient ?? ApiClient(),
@@ -26,6 +37,10 @@ class AuthService {
   final ApiClient _apiClient;
   final bool _useMockAuth;
 
+  /// Authenticates a user with email and password.
+  ///
+  /// Returns [AuthResponse] containing the JWT token and user profile.
+  /// Throws [AuthException] on invalid credentials or network errors.
   Future<AuthResponse> login({
     required String email,
     required String password,

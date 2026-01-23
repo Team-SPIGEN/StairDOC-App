@@ -1,3 +1,7 @@
+/// Represents an authenticated user in the StairDOC system.
+///
+/// Contains identity information and role-based access control data.
+/// Used throughout the app for displaying user info and authorization checks.
 class User {
   const User({
     required this.id,
@@ -7,12 +11,22 @@ class User {
     this.phone,
   });
 
+  /// Unique identifier for the user.
   final String id;
+
+  /// User's display name.
   final String name;
+
+  /// User's email address (used for login).
   final String email;
+
+  /// User's role determining access permissions (e.g., 'operator', 'recipient', 'admin').
   final String role;
+
+  /// Optional phone number for contact purposes.
   final String? phone;
 
+  /// Creates a [User] instance from a JSON map.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id']?.toString() ?? '',
