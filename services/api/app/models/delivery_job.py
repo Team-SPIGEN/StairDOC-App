@@ -13,6 +13,7 @@ class DeliveryJob(SQLModel, table=True):
     dropoff_zone: str
     requested_by: str
     status: str = Field(default="pending")
-    assigned_robot_id: Optional[str] = Field(default=None, foreign_key="robot_units.id")
+    # Foreign key removed temporarily - will be added via Alembic migration
+    assigned_robot_id: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

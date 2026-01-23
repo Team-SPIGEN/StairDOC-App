@@ -1,46 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../models/access_log.dart';
+import '../../providers/access_control/access_control_cubit.dart';
+import '../../services/container_access_service.dart';
 import '../../utils/ui_constants.dart';
 
 /// Displays access log entries for container lock/unlock events.
+/// Uses [AccessControlCubit] to fetch real data from the API.
 class AccessLogsScreen extends StatelessWidget {
   const AccessLogsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final logs = [
-      _AccessLogEntry(
-        user: 'John Doe',
-        action: AccessAction.unlock,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-        location: 'Floor 2 - Office 201',
-      ),
-      _AccessLogEntry(
-        user: 'Jane Smith',
-        action: AccessAction.lock,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-        location: 'Floor 3 - Office 305',
-      ),
-      _AccessLogEntry(
-        user: 'John Doe',
-        action: AccessAction.lock,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        location: 'Floor 2 - Office 201',
-      ),
-      _AccessLogEntry(
-        user: 'Admin',
-        action: AccessAction.unlock,
-        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-        location: 'Floor 1 - Reception',
-      ),
-      _AccessLogEntry(
-        user: 'System',
-        action: AccessAction.autoLock,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        location: 'Floor 1 - Reception',
-      ),
-    ];
+    return BlocProvider(
+      create: (context) => AccessControlCubit(
+        containerAccessService: context.read<ContainerAccessService>(),
+      )..initialize(),
+      child: const _AccessLogsView(),
+    );
+  }
+}
 
+class _AccessLogsView extends StatefulWidget {
+  const _AccessLogsView();
+
+  @override
+  State<_AccessLogsView> createState() => _AccessLogsViewState();
+}
+
+class _AccessLogsViewState extends State<_AccessLogsView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<AccessControlCubit>().loadMoreLogs();
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Access Logs'),
@@ -57,39 +77,195 @@ class AccessLogsScreen extends StatelessWidget {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () => context.read<AccessControlCubit>().refreshLogs(),
+          ),
         ],
       ),
-      body: SafeArea(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(Insets.lg),
-          itemCount: logs.length,
-          itemBuilder: (context, index) {
-            final log = logs[index];
-            final isFirst = index == 0;
-            final isLast = index == logs.length - 1;
+      body: BlocConsumer<AccessControlCubit, AccessControlState>(
+        listener: (context, state) {
+          if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                action: SnackBarAction(
+                  label: 'Retry',
+                  textColor: Theme.of(context).colorScheme.onError,
+                  onPressed: () =>
+                      context.read<AccessControlCubit>().refreshLogs(),
+                ),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return switch (state.status) {
+            AccessControlStatus.initial ||
+            AccessControlStatus.loading => const _LoadingView(),
+            AccessControlStatus.error when state.logs.isEmpty => _ErrorView(
+              message: state.errorMessage,
+            ),
+            _ => _LogsListView(
+              logs: state.logs,
+              hasMoreLogs: state.hasMoreLogs,
+              isLoadingMore: state.status == AccessControlStatus.loading,
+              scrollController: _scrollController,
+            ),
+          };
+        },
+      ),
+    );
+  }
+}
 
-            return _AccessLogCard(log: log, isFirst: isFirst, isLast: isLast);
-          },
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: Insets.md),
+          Text('Loading access logs...'),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({this.message});
+
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(Insets.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: colorScheme.error,
+            ),
+            const SizedBox(height: Insets.md),
+            Text(
+              'Failed to load logs',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            if (message != null) ...[
+              const SizedBox(height: Insets.sm),
+              Text(
+                message!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+            const SizedBox(height: Insets.lg),
+            FilledButton.icon(
+              onPressed: () => context.read<AccessControlCubit>().refreshLogs(),
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-enum AccessAction { lock, unlock, autoLock }
-
-class _AccessLogEntry {
-  const _AccessLogEntry({
-    required this.user,
-    required this.action,
-    required this.timestamp,
-    required this.location,
+class _LogsListView extends StatelessWidget {
+  const _LogsListView({
+    required this.logs,
+    required this.hasMoreLogs,
+    required this.isLoadingMore,
+    required this.scrollController,
   });
 
-  final String user;
-  final AccessAction action;
-  final DateTime timestamp;
-  final String location;
+  final List<AccessLogEntry> logs;
+  final bool hasMoreLogs;
+  final bool isLoadingMore;
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    if (logs.isEmpty) {
+      return const _EmptyView();
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<AccessControlCubit>().refreshLogs();
+      },
+      child: ListView.builder(
+        controller: scrollController,
+        padding: const EdgeInsets.all(Insets.lg),
+        itemCount: logs.length + (hasMoreLogs ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= logs.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: Insets.lg),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final log = logs[index];
+          final isFirst = index == 0;
+          final isLast = index == logs.length - 1 && !hasMoreLogs;
+
+          return _AccessLogCard(log: log, isFirst: isFirst, isLast: isLast);
+        },
+      ),
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  const _EmptyView();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.history_rounded,
+            size: 64,
+            color: colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: Insets.md),
+          Text(
+            'No access logs yet',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: Insets.sm),
+          Text(
+            'Lock/unlock actions will appear here',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AccessLogCard extends StatelessWidget {
@@ -99,7 +275,7 @@ class _AccessLogCard extends StatelessWidget {
     required this.isLast,
   });
 
-  final _AccessLogEntry log;
+  final AccessLogEntry log;
   final bool isFirst;
   final bool isLast;
 
@@ -113,17 +289,15 @@ class _AccessLogCard extends StatelessWidget {
       return '${diff.inMinutes}m ago';
     } else if (diff.inHours < 24) {
       return '${diff.inHours}h ago';
-    } else {
+    } else if (diff.inDays < 7) {
       return '${diff.inDays}d ago';
+    } else {
+      return '${dt.day}/${dt.month}/${dt.year}';
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final (actionColor, actionIcon, actionText) = switch (log.action) {
+  (Color, IconData, String) _getActionStyle(AccessAction action) {
+    return switch (action) {
       AccessAction.unlock => (
         Colors.green,
         Icons.lock_open_rounded,
@@ -136,6 +310,41 @@ class _AccessLogCard extends StatelessWidget {
         'Auto-locked',
       ),
     };
+  }
+
+  IconData _getMethodIcon(AccessMethod method) {
+    return switch (method) {
+      AccessMethod.app => Icons.smartphone_rounded,
+      AccessMethod.rfid => Icons.contactless_rounded,
+      AccessMethod.voice => Icons.mic_rounded,
+      AccessMethod.auto => Icons.timer_rounded,
+    };
+  }
+
+  String _getMethodLabel(AccessMethod method) {
+    return switch (method) {
+      AccessMethod.app => 'App',
+      AccessMethod.rfid => 'RFID',
+      AccessMethod.voice => 'Voice',
+      AccessMethod.auto => 'Auto',
+    };
+  }
+
+  Color _getStatusColor(AccessStatus status, ColorScheme colorScheme) {
+    return switch (status) {
+      AccessStatus.success => Colors.green,
+      AccessStatus.failed => colorScheme.error,
+      AccessStatus.denied => Colors.orange,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final (actionColor, actionIcon, actionText) = _getActionStyle(log.action);
+    final statusColor = _getStatusColor(log.status, colorScheme);
 
     return IntrinsicHeight(
       child: Row(
@@ -156,7 +365,9 @@ class _AccessLogCard extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: actionColor,
+                    color: log.status == AccessStatus.success
+                        ? actionColor
+                        : statusColor,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -214,11 +425,36 @@ class _AccessLogCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: Insets.xs),
-                  Text(
-                    'By ${log.user}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'By ${log.userName}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      // Status badge
+                      if (log.status != AccessStatus.success)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Insets.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            log.status.name.toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -235,8 +471,77 @@ class _AccessLogCard extends StatelessWidget {
                           color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
+                      const Spacer(),
+                      // Method indicator
+                      Icon(
+                        _getMethodIcon(log.method),
+                        size: 14,
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _getMethodLabel(log.method),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
                     ],
                   ),
+                  // Error message if failed
+                  if (log.errorMessage != null) ...[
+                    const SizedBox(height: Insets.xs),
+                    Container(
+                      padding: const EdgeInsets.all(Insets.sm),
+                      decoration: BoxDecoration(
+                        color: colorScheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 14,
+                            color: colorScheme.error,
+                          ),
+                          const SizedBox(width: Insets.xs),
+                          Expanded(
+                            child: Text(
+                              log.errorMessage!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  // Photo thumbnail if available
+                  if (log.photoUrl != null) ...[
+                    const SizedBox(height: Insets.sm),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        log.photoUrl!,
+                        height: 60,
+                        width: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 60,
+                            width: 80,
+                            color: colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

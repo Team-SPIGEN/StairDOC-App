@@ -1,3 +1,9 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "chat.tools.terminal.autoApprove": {
+        "/^cd \"E:\\\\UOM\\\\IOT Project\\\\StairDoc\\\\Mobile-App\\\\StairDOC-App\" ; \\.\\\\\\.venv\\\\Scripts\\\\Activate\\.ps1 ; pip install aiosqlite httpx$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
 }
