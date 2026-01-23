@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'providers/auth/auth_bloc.dart';
+import 'providers/notification/notification_cubit.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/container_access_service.dart';
+import 'services/notification_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 
@@ -29,7 +31,9 @@ class _StairDocAppState extends State<StairDocApp> {
   late final AuthService _authService;
   late final StorageService _storageService;
   late final ContainerAccessService _containerAccessService;
+  late final NotificationService _notificationService;
   late final AuthBloc _authBloc;
+  late final NotificationCubit _notificationCubit;
   late final AppRouter _appRouter;
 
   @override
@@ -38,9 +42,13 @@ class _StairDocAppState extends State<StairDocApp> {
     _authService = AuthService();
     _storageService = StorageService();
     _containerAccessService = ContainerAccessService();
+    _notificationService = NotificationService();
     _authBloc = AuthBloc(
       authService: _authService,
       storageService: _storageService,
+    );
+    _notificationCubit = NotificationCubit(
+      notificationService: _notificationService,
     );
     _appRouter = AppRouter(_authBloc);
   }
@@ -48,6 +56,8 @@ class _StairDocAppState extends State<StairDocApp> {
   @override
   void dispose() {
     _authBloc.close();
+    _notificationCubit.close();
+    _notificationService.dispose();
     super.dispose();
   }
 
@@ -60,9 +70,15 @@ class _StairDocAppState extends State<StairDocApp> {
         RepositoryProvider<ContainerAccessService>.value(
           value: _containerAccessService,
         ),
+        RepositoryProvider<NotificationService>.value(
+          value: _notificationService,
+        ),
       ],
-      child: BlocProvider<AuthBloc>.value(
-        value: _authBloc,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>.value(value: _authBloc),
+          BlocProvider<NotificationCubit>.value(value: _notificationCubit),
+        ],
         child: MaterialApp.router(
           title: 'Delivery Robot Control',
           themeMode: ThemeMode.system,
