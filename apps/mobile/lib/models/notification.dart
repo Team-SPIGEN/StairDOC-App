@@ -1,6 +1,7 @@
 /// Notification models for StairDOC app.
 ///
 /// Matches backend schemas in services/api/app/schemas/notification.py
+library;
 
 import 'package:flutter/material.dart';
 

@@ -1,4 +1,5 @@
 /// Notification state for BLoC pattern.
+library;
 
 import 'package:equatable/equatable.dart';
 
