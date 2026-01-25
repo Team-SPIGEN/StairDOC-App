@@ -163,6 +163,13 @@ class _MainPageState extends State<MainPage> {
                                 label: 'Notifications',
                                 onTap: () => context.push('/notifications'),
                               ),
+                              _DashboardPill(
+                                label: 'Live camera',
+                                onTap: () => context.push(
+                                  '/camera',
+                                  extra: {'robotId': 'default'},
+                                ),
+                              ),
                             ],
                           ),
                         ],
