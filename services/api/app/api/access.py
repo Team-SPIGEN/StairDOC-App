@@ -5,6 +5,8 @@ Provides endpoints for:
 - Locking/unlocking the robot's document container
 - Retrieving access logs with pagination and filtering
 - Querying current container status
+
+Optimized for high throughput with caching.
 """
 
 from datetime import datetime
@@ -15,6 +17,7 @@ from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..core.database import get_session
+from ..core.cache import get_cache, ACCESS_LOG_TTL
 from ..models.access_log import AccessLog
 from ..models.user import User
 from ..schemas.access import (
@@ -197,7 +200,25 @@ async def get_access_logs(
     
     Returns logs in reverse chronological order (most recent first).
     Supports filtering by action type, status, and user.
+    
+    Cached for 60 seconds to reduce database load.
     """
+    cache = get_cache()
+    
+    # Build cache key
+    cache_key = f"access:logs:l{limit}:o{offset}"
+    if action:
+        cache_key += f":a={action}"
+    if status_filter:
+        cache_key += f":s={status_filter}"
+    if user_id:
+        cache_key += f":u={user_id}"
+    
+    # Try cache
+    cached = await cache.get(cache_key)
+    if cached:
+        return AccessLogListResponse(**cached)
+    
     # Build query
     query = select(AccessLog)
     count_query = select(func.count(AccessLog.id))
@@ -216,21 +237,26 @@ async def get_access_logs(
         count_query = count_query.where(AccessLog.user_id == user_id)
     
     # Get total count
-    total_result = await session.exec(count_query)
-    total = total_result.one()
+    total_result = await session.execute(count_query)
+    total = total_result.scalar() or 0
     
     # Get paginated results
     query = query.order_by(AccessLog.timestamp.desc()).offset(offset).limit(limit)
-    result = await session.exec(query)
-    logs = result.all()
+    result = await session.execute(query)
+    logs = result.scalars().all()
     
-    return AccessLogListResponse(
+    response = AccessLogListResponse(
         logs=[AccessLogResponse.model_validate(log) for log in logs],
         total=total,
         limit=limit,
         offset=offset,
         has_more=(offset + len(logs)) < total,
     )
+    
+    # Cache the response
+    await cache.set(cache_key, response.model_dump(), ACCESS_LOG_TTL)
+    
+    return response
 
 
 @router.get("/logs/{log_id}", response_model=AccessLogResponse)
@@ -243,8 +269,8 @@ async def get_access_log(
     Retrieve a single access log entry by ID.
     """
     query = select(AccessLog).where(AccessLog.id == log_id)
-    result = await session.exec(query)
-    log = result.one_or_none()
+    result = await session.execute(query)
+    log = result.scalar_one_or_none()
     
     if not log:
         raise HTTPException(
@@ -276,8 +302,8 @@ async def get_container_status(
         .order_by(AccessLog.timestamp.desc())
         .limit(1)
     )
-    result = await session.exec(query)
-    last_log = result.one_or_none()
+    result = await session.execute(query)
+    last_log = result.scalar_one_or_none()
     
     return ContainerStatusResponse(
         is_locked=hw_status.state == ContainerState.LOCKED,
