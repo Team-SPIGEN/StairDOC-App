@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, Set
+from typing import Any, Optional, Set
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     refresh_token_expire_minutes: int = Field(60 * 24 * 30, alias="REFRESH_TOKEN_EXPIRE_MINUTES")
     database_url: str = Field("sqlite+aiosqlite:///./stairdoc.db", alias="DATABASE_URL")
     allowed_origins_str: str = Field(default="", alias="ALLOWED_ORIGINS")
+    
+    # Redis configuration for caching (optional)
+    redis_url: Optional[str] = Field(default=None, alias="REDIS_URL")
+    
+    # Database pool settings
+    db_pool_size: int = Field(default=20, alias="DB_POOL_SIZE")
+    db_max_overflow: int = Field(default=30, alias="DB_MAX_OVERFLOW")
+    db_pool_timeout: int = Field(default=30, alias="DB_POOL_TIMEOUT")
 
     @property
     def allowed_origins(self) -> Set[str]:
