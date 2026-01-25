@@ -1,4 +1,5 @@
 /// NotificationCubit for managing notification state.
+library;
 
 import 'dart:async';
 

@@ -1,6 +1,7 @@
 /// Notification service for real-time alerts.
 ///
 /// Handles WebSocket connection for real-time notifications and REST API calls.
+library;
 
 import 'dart:async';
 import 'dart:convert';
