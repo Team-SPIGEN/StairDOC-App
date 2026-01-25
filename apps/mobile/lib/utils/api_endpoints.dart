@@ -39,6 +39,12 @@ class ApiEndpoints {
   static const String notificationPushToken = '/notifications/push-token';
   static const String notificationTest = '/notifications/test';
 
+  // Camera endpoints
+  static const String cameraStreamStart = '/camera/stream/start';
+  static const String cameraStreamStop = '/camera/stream';
+  static const String cameraSnapshot = '/camera/snapshot';
+  static const String cameraSettings = '/camera';
+
   static String resolve(String path) => '$baseUrl$path';
 
   static Uri robotStatusSocketUri() => Uri.parse(robotSocketUrl);
@@ -54,5 +60,15 @@ class ApiEndpoints {
   /// WebSocket URI for real-time notifications.
   static Uri notificationSocketUri(String userId) {
     return Uri.parse('$wsBaseUrl/../notifications/ws/$userId');
+  }
+
+  /// MJPEG stream URL for camera.
+  static String mjpegStreamUrl(String cameraId, String sessionId) {
+    return '$baseUrl/camera/$cameraId/stream/mjpeg?session=$sessionId';
+  }
+
+  /// WebSocket URI for camera frames.
+  static Uri cameraSocketUri(String cameraId) {
+    return Uri.parse('$wsBaseUrl/../camera/$cameraId/ws');
   }
 }

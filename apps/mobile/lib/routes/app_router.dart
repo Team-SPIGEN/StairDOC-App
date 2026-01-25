@@ -9,6 +9,7 @@ import '../screens/access/access_logs_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/camera_screen.dart';
 import '../screens/delivery/delivery_queue_screen.dart';
 import '../screens/main_page.dart';
 import '../screens/notification/notification_center_screen.dart';
@@ -77,6 +78,18 @@ class AppRouter {
             path: '/notifications',
             name: 'notifications',
             builder: (context, state) => const NotificationCenterScreen(),
+          ),
+          GoRoute(
+            path: '/camera',
+            name: 'camera',
+            builder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              return CameraScreen(
+                robotId: extra?['robotId'] ?? 'default',
+                cameraId: extra?['cameraId'],
+                autoStart: extra?['autoStart'] ?? true,
+              );
+            },
           ),
         ],
         redirect: (context, state) {
