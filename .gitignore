@@ -26,14 +26,16 @@ migrate_working_dir/
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
-/apps/mobile/.dart_tool/
-/apps/mobile/.flutter-plugins-dependencies
-/apps/mobile/.flutter-plugins
-/apps/mobile/.pub-cache/
-/apps/mobile/.pub/
-/apps/mobile/build/
-/apps/mobile/coverage/
-/apps/mobile/.metadata
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+.metadata
+pubspec.lock
 
 # Symbolication related
 app.*.symbols
@@ -42,17 +44,187 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/apps/mobile/android/app/debug
-/apps/mobile/android/app/profile
-/apps/mobile/android/app/release
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+*.keystore
+!debug.keystore
+*.jks
 
-# Backend virtualenvs + caches
-/.venv/
-/services/api/.venv/
-/services/api/__pycache__/
-/services/api/.mypy_cache/
+# iOS/macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/macos/Pods/
+**/macos/.symlinks/
+**/macos/Flutter/ephemeral/
+Podfile.lock
 
-# Backend runtime files
-/services/api/.env
-/services/api/stairdoc.db
-/services/api/.coverage
+# Windows
+**/windows/flutter/ephemeral/
+
+# Linux
+**/linux/flutter/ephemeral/
+
+# Web
+**/web/favicon.png
+
+# =============================================================================
+# Python / Backend
+# =============================================================================
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env.local
+.env.*.local
+
+# Virtual env artifacts in services/api (if venv created there)
+services/api/Include/
+services/api/Lib/
+services/api/Scripts/
+services/api/scripts/*.exe
+services/api/pyvenv.cfg
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Distribution / packaging
+dist/
+build/
+eggs/
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+.installed.cfg
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+nosetests.xml
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Environment variables (keep .env.example)
+.env
+!.env.example
+
+# =============================================================================
+# Node.js (if using any JS tooling)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# =============================================================================
+# IDE and Editor files
+# =============================================================================
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.launch
+
+# =============================================================================
+# OS generated files
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =============================================================================
+# Logs and temporary files
+# =============================================================================
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# =============================================================================
+# Secrets and credentials (NEVER commit these)
+# =============================================================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+firebase*.json
+google-services.json
+GoogleService-Info.plist
+serviceAccountKey.json
+
+# =============================================================================
+# Docker
+# =============================================================================
+docker-compose.override.yml
+.docker/
+
+# =============================================================================
+# Terraform / Infrastructure
+# =============================================================================
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# =============================================================================
+# Raspberry Pi specific
+# =============================================================================
+*.img
+*.iso

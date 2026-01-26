@@ -24,8 +24,8 @@ async def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     stmt = select(User).where(User.id == payload.get("sub"))
-    user = await session.exec(stmt)
-    user_obj = user.one_or_none()
+    result = await session.execute(stmt)
+    user_obj = result.scalars().one_or_none()
     if not user_obj:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user_obj

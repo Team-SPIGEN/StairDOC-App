@@ -14,8 +14,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=AuthToken)
 async def register(user_in: UserCreate, session=Depends(get_session)):
-    existing = await session.exec(select(User).where(User.email == user_in.email))
-    if existing.one_or_none():
+    result = await session.execute(select(User).where(User.email == user_in.email))
+    existing = result.scalars().one_or_none()
+    if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     user = User(
@@ -34,8 +35,8 @@ async def register(user_in: UserCreate, session=Depends(get_session)):
 
 @router.post("/login", response_model=AuthToken)
 async def login(credentials: UserLogin, session=Depends(get_session)):
-    result = await session.exec(select(User).where(User.email == credentials.email))
-    user = result.one_or_none()
+    result = await session.execute(select(User).where(User.email == credentials.email))
+    user = result.scalars().one_or_none()
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return _issue_tokens(user)
@@ -54,8 +55,8 @@ async def refresh_token(data: RefreshRequest, session=Depends(get_session)):
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid refresh token type")
 
-    db_result = await session.exec(select(User).where(User.id == payload.get("sub")))
-    user = db_result.one_or_none()
+    db_result = await session.execute(select(User).where(User.id == payload.get("sub")))
+    user = db_result.scalars().one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return _issue_tokens(user)
