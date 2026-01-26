@@ -516,9 +516,9 @@ class _CameraSettingsSheetState extends State<CameraSettingsSheet> {
   void initState() {
     super.initState();
     final s = widget.initialSettings;
-    _brightness = s.brightness;
-    _contrast = s.contrast;
-    _saturation = s.saturation;
+    _brightness = s.brightness / 100.0;
+    _contrast = s.contrast / 100.0;
+    _saturation = s.saturation / 100.0;
     _nightVision = s.nightVision;
     _autoFocus = s.autoFocus;
   }
@@ -667,9 +667,9 @@ class _CameraSettingsSheetState extends State<CameraSettingsSheet> {
 
   void _applySettings() {
     final settings = CameraSettings(
-      brightness: _brightness,
-      contrast: _contrast,
-      saturation: _saturation,
+      brightness: (_brightness * 100).round(),
+      contrast: (_contrast * 100).round(),
+      saturation: (_saturation * 100).round(),
       nightVision: _nightVision,
       autoFocus: _autoFocus,
       quality: widget.initialSettings.quality,

@@ -194,7 +194,6 @@ class CameraService {
   /// Parse MJPEG multipart stream into individual JPEG frames.
   Stream<Uint8List> _parseMjpegStream(Stream<List<int>> stream) async* {
     final buffer = BytesBuilder();
-    bool inFrame = false;
     final boundary = utf8.encode('--frame');
     final contentType = utf8.encode('Content-Type: image/jpeg');
 

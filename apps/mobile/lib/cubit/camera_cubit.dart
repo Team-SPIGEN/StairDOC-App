@@ -335,6 +335,9 @@ class CameraCubit extends Cubit<CameraState> {
       case CameraStatus.error:
         stateStatus = CameraStateStatus.error;
         break;
+      case CameraStatus.online:
+        stateStatus = CameraStateStatus.initial;
+        break;
       case CameraStatus.offline:
       case CameraStatus.idle:
         stateStatus = CameraStateStatus.initial;

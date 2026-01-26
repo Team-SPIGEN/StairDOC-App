@@ -10,7 +10,8 @@ enum CameraStatus {
   offline('offline'),
   connecting('connecting'),
   error('error'),
-  streaming('streaming');
+  streaming('streaming'),
+  idle('idle');
 
   const CameraStatus(this.value);
   final String value;
@@ -35,6 +36,8 @@ enum CameraStatus {
         return Icons.error_outline;
       case CameraStatus.streaming:
         return Icons.play_circle;
+      case CameraStatus.idle:
+        return Icons.pause_circle;
     }
   }
 
@@ -51,6 +54,26 @@ enum CameraStatus {
         return Colors.red;
       case CameraStatus.streaming:
         return Colors.blue;
+      case CameraStatus.idle:
+        return Colors.amber;
+    }
+  }
+
+  /// Get a label for this status.
+  String get label {
+    switch (this) {
+      case CameraStatus.online:
+        return 'Online';
+      case CameraStatus.offline:
+        return 'Offline';
+      case CameraStatus.connecting:
+        return 'Connecting';
+      case CameraStatus.error:
+        return 'Error';
+      case CameraStatus.streaming:
+        return 'Streaming';
+      case CameraStatus.idle:
+        return 'Idle';
     }
   }
 }
@@ -82,6 +105,48 @@ enum StreamQuality {
         return '1280x720 (HD)';
       case StreamQuality.auto:
         return 'Auto';
+    }
+  }
+
+  /// Get an icon for this quality level.
+  IconData get icon {
+    switch (this) {
+      case StreamQuality.low:
+        return Icons.sd;
+      case StreamQuality.medium:
+        return Icons.hd;
+      case StreamQuality.high:
+        return Icons.high_quality;
+      case StreamQuality.auto:
+        return Icons.auto_awesome;
+    }
+  }
+
+  /// Get a label for this quality level.
+  String get label {
+    switch (this) {
+      case StreamQuality.low:
+        return 'Low';
+      case StreamQuality.medium:
+        return 'Medium';
+      case StreamQuality.high:
+        return 'High';
+      case StreamQuality.auto:
+        return 'Auto';
+    }
+  }
+
+  /// Get a description for this quality level.
+  String get description {
+    switch (this) {
+      case StreamQuality.low:
+        return '320x240 at 10fps - minimal bandwidth';
+      case StreamQuality.medium:
+        return '640x480 at 15fps - balanced quality';
+      case StreamQuality.high:
+        return '1280x720 at 25fps - best quality';
+      case StreamQuality.auto:
+        return 'Automatically adjusts based on connection';
     }
   }
 }
@@ -198,6 +263,7 @@ class CameraSettings {
     this.contrast = 50,
     this.saturation = 50,
     this.autoExposure = true,
+    this.autoFocus = true,
     this.nightVision = false,
     this.flipHorizontal = false,
     this.flipVertical = false,
@@ -209,6 +275,7 @@ class CameraSettings {
   final int contrast;
   final int saturation;
   final bool autoExposure;
+  final bool autoFocus;
   final bool nightVision;
   final bool flipHorizontal;
   final bool flipVertical;
@@ -221,6 +288,7 @@ class CameraSettings {
       contrast: json['contrast'] as int? ?? 50,
       saturation: json['saturation'] as int? ?? 50,
       autoExposure: json['auto_exposure'] as bool? ?? true,
+      autoFocus: json['auto_focus'] as bool? ?? true,
       nightVision: json['night_vision'] as bool? ?? false,
       flipHorizontal: json['flip_horizontal'] as bool? ?? false,
       flipVertical: json['flip_vertical'] as bool? ?? false,
@@ -235,6 +303,7 @@ class CameraSettings {
       'contrast': contrast,
       'saturation': saturation,
       'auto_exposure': autoExposure,
+      'auto_focus': autoFocus,
       'night_vision': nightVision,
       'flip_horizontal': flipHorizontal,
       'flip_vertical': flipVertical,
@@ -248,6 +317,7 @@ class CameraSettings {
     int? contrast,
     int? saturation,
     bool? autoExposure,
+    bool? autoFocus,
     bool? nightVision,
     bool? flipHorizontal,
     bool? flipVertical,
@@ -259,6 +329,7 @@ class CameraSettings {
       contrast: contrast ?? this.contrast,
       saturation: saturation ?? this.saturation,
       autoExposure: autoExposure ?? this.autoExposure,
+      autoFocus: autoFocus ?? this.autoFocus,
       nightVision: nightVision ?? this.nightVision,
       flipHorizontal: flipHorizontal ?? this.flipHorizontal,
       flipVertical: flipVertical ?? this.flipVertical,
@@ -367,6 +438,9 @@ class Snapshot {
   final int height;
   final int fileSize;
   final Map<String, dynamic>? metadata;
+
+  /// Alias for capturedAt for compatibility.
+  DateTime get timestamp => capturedAt;
 
   factory Snapshot.fromJson(Map<String, dynamic> json) {
     return Snapshot(
