@@ -1,0 +1,3 @@
+"""
+Models tests package.
+"""

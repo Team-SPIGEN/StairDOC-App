@@ -118,7 +118,11 @@ if settings.rate_limit_enabled:
 # 4. Request validation middleware (validates content-type and size)
 app.add_middleware(
     RequestValidationMiddleware,
-    max_body_size=settings.max_request_size,
+    max_body_sizes={
+        "application/json": settings.max_request_size,
+        "multipart/form-data": settings.max_request_size * 10,  # Larger for file uploads
+        "default": settings.max_request_size,
+    },
 )
 
 # 5. Security headers middleware (adds security headers to responses)

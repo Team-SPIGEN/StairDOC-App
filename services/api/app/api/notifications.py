@@ -209,7 +209,7 @@ class TestNotificationRequest(BaseModel):
     user_id: str
     title: str = "Test Notification"
     body: str = "This is a test notification."
-    type: NotificationType = NotificationType.SYSTEM_INFO
+    type: NotificationType = NotificationType.SYSTEM_ALERT
 
 
 @router.post("/test", response_model=Notification)
