@@ -1,4 +1,5 @@
 /// Camera stream view widget for displaying live video feed.
+library;
 
 import 'dart:typed_data';
 

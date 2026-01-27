@@ -1,6 +1,7 @@
 /// Camera models for live video streaming.
 ///
 /// Matches backend schemas in services/api/app/schemas/camera.py
+library;
 
 import 'package:flutter/material.dart';
 
