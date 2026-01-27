@@ -1,4 +1,5 @@
 /// Camera state management using BLoC pattern.
+library;
 
 import 'dart:async';
 import 'dart:typed_data';

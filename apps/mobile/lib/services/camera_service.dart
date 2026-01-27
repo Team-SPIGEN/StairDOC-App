@@ -1,6 +1,7 @@
 /// Camera service for live video streaming with low latency.
 ///
 /// Provides MJPEG stream handling and snapshot capture.
+library;
 
 import 'dart:async';
 import 'dart:convert';
