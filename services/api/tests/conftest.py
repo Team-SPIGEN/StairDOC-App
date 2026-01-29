@@ -22,10 +22,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
 # Set test environment before importing app modules
-os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only-not-production"
+# SECRET_KEY must be at least 32 characters for production validation
+os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only-minimum-32-chars-required"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test.db"
 os.environ["RATE_LIMIT_ENABLED"] = "false"
 os.environ["LOG_LEVEL"] = "WARNING"
+os.environ["ENVIRONMENT"] = "development"
 
 from app.core.config import Settings, get_settings
 from app.core.database import get_session

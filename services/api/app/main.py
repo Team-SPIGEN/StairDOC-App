@@ -108,12 +108,7 @@ app.add_middleware(
 
 # 3. Rate limiting middleware (protects against abuse)
 if settings.rate_limit_enabled:
-    app.add_middleware(
-        RateLimitMiddleware,
-        default_requests=settings.rate_limit_requests_per_minute,
-        default_window=60,
-        default_burst=settings.rate_limit_burst,
-    )
+    app.add_middleware(RateLimitMiddleware)
 
 # 4. Request validation middleware (validates content-type and size)
 app.add_middleware(
