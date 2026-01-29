@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Any, List, Optional, Set
+import warnings
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,13 +16,14 @@ class Settings(BaseSettings):
     # Application settings
     app_name: str = "StairDOC API"
     app_version: str = "1.0.0"
+    environment: str = Field(default="development", alias="ENVIRONMENT")
     debug: bool = Field(default=False, alias="DEBUG")
     api_v1_prefix: str = "/api/v1"
     
     # Security settings
     secret_key: str = Field(..., alias="SECRET_KEY")
     access_token_expire_minutes: int = Field(30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
-    refresh_token_expire_minutes: int = Field(60 * 24 * 30, alias="REFRESH_TOKEN_EXPIRE_MINUTES")
+    refresh_token_expire_minutes: int = Field(60 * 24 * 7, alias="REFRESH_TOKEN_EXPIRE_MINUTES")
     
     # Database settings
     database_url: str = Field("sqlite+aiosqlite:///./stairdoc.db", alias="DATABASE_URL")
@@ -53,6 +55,14 @@ class Settings(BaseSettings):
     # Request size limits (in bytes)
     max_request_size: int = Field(default=1_048_576, alias="MAX_REQUEST_SIZE")  # 1MB
     max_upload_size: int = Field(default=10_485_760, alias="MAX_UPLOAD_SIZE")  # 10MB
+    
+    # Sentry (error tracking)
+    sentry_dsn: Optional[str] = Field(default=None, alias="SENTRY_DSN")
+
+    @property
+    def is_production(self) -> bool:
+        """Check if running in production mode."""
+        return self.environment.lower() == "production" or not self.debug
 
     @property
     def allowed_origins(self) -> Set[str]:
@@ -76,6 +86,38 @@ class Settings(BaseSettings):
         if v.upper() not in valid_levels:
             raise ValueError(f"Invalid log level. Must be one of: {valid_levels}")
         return v.upper()
+    
+    @field_validator("secret_key")
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
+        """Validate secret key strength."""
+        if len(v) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters long")
+        if v.startswith("CHANGE_ME") or v == "your-secret-key-here":
+            raise ValueError("SECRET_KEY must be changed from the default value")
+        return v
+    
+    @model_validator(mode="after")
+    def validate_production_settings(self) -> "Settings":
+        """Validate settings for production environment."""
+        if self.is_production:
+            # Warn about insecure settings in production
+            if self.debug:
+                warnings.warn("DEBUG=true in production is a security risk!", UserWarning)
+            
+            if "sqlite" in self.database_url.lower():
+                warnings.warn("SQLite is not recommended for production. Use PostgreSQL.", UserWarning)
+            
+            if not self.redis_url:
+                warnings.warn("Redis is recommended for production caching and rate limiting.", UserWarning)
+            
+            if self.log_request_body or self.log_response_body:
+                warnings.warn("Logging request/response bodies in production may expose sensitive data.", UserWarning)
+            
+            if self.access_token_expire_minutes > 60:
+                warnings.warn("Access token expiry > 60 minutes increases security risk.", UserWarning)
+        
+        return self
 
 
 @lru_cache
