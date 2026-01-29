@@ -50,6 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth < 600;
 
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -82,186 +84,205 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Scaffold(
             appBar: AppBar(automaticallyImplyLeading: false),
             body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Insets.lg,
-                  vertical: Insets.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(22),
-                            ),
-                            child: Icon(
-                              Icons.smart_toy_outlined,
-                              size: 40,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: Insets.sm),
-                          Text(
-                            'Delivery Robot Control',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: Insets.xs),
-                          Text(
-                            'Sign in to orchestrate secure document deliveries.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.65,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? Insets.lg : 48,
+                    vertical: Insets.lg,
+                  ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isMobile ? double.infinity : 450,
                     ),
-                    const SizedBox(height: Insets.lg),
-                    if (_errorMessage != null) ...[
-                      AnimatedOpacity(
-                        opacity: _errorMessage != null ? 1 : 0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(Insets.sm),
-                          decoration: BoxDecoration(
-                            color: colorScheme.error.withValues(alpha: 0.08),
-                            borderRadius: CornerRadius.card,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Center(
+                          child: Column(
                             children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: colorScheme.error,
+                              Container(
+                                width: isMobile ? 72 : 88,
+                                height: isMobile ? 72 : 88,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: Icon(
+                                  Icons.smart_toy_outlined,
+                                  size: isMobile ? 40 : 48,
+                                  color: colorScheme.primary,
+                                ),
                               ),
-                              const SizedBox(width: Insets.xs),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage ?? '',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
+                              const SizedBox(height: Insets.sm),
+                              Text(
+                                'Delivery Robot Control',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: Insets.xs),
+                              Text(
+                                'Sign in to orchestrate secure document deliveries.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.65,
+                                  ),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: Insets.lg),
+                        if (_errorMessage != null) ...[
+                          AnimatedOpacity(
+                            opacity: _errorMessage != null ? 1 : 0,
+                            duration: const Duration(milliseconds: 200),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(Insets.sm),
+                              decoration: BoxDecoration(
+                                color: colorScheme.error.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: CornerRadius.card,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
                                     color: colorScheme.error,
                                   ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () =>
-                                    setState(() => _errorMessage = null),
-                                icon: Icon(
-                                  Icons.close,
-                                  color: colorScheme.error,
-                                ),
-                                tooltip: 'Dismiss',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: Insets.md),
-                    ],
-                    Form(
-                      key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: Column(
-                        children: [
-                          CustomTextField(
-                            label: 'Email',
-                            hintText: 'name@company.com',
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            prefixIcon: Icons.email_outlined,
-                            validator: Validators.validateEmail,
-                          ),
-                          const SizedBox(height: Insets.md),
-                          CustomTextField(
-                            label: 'Password',
-                            hintText: 'Enter your password',
-                            controller: _passwordController,
-                            textInputAction: TextInputAction.done,
-                            prefixIcon: Icons.lock_outline,
-                            validator: Validators.validatePassword,
-                            isPassword: true,
-                            enableObscureToggle: true,
-                          ),
-                          const SizedBox(height: Insets.sm),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              InkWell(
-                                onTap: () =>
-                                    setState(() => _rememberMe = !_rememberMe),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 6,
-                                    horizontal: 8,
+                                  const SizedBox(width: Insets.xs),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage ?? '',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(color: colorScheme.error),
+                                    ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (value) => setState(
-                                          () => _rememberMe = value ?? false,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Remember me',
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ],
+                                  IconButton(
+                                    onPressed: () =>
+                                        setState(() => _errorMessage = null),
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: colorScheme.error,
+                                    ),
+                                    tooltip: 'Dismiss',
                                   ),
-                                ),
+                                ],
                               ),
-                              TextButton(
-                                onPressed: () => context.go('/forgot-password'),
-                                child: const Text('Forgot password?'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: Insets.md),
-                          CustomButton(
-                            label: 'Sign In',
-                            isLoading: isLoading,
-                            onPressed: _handleLogin,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: Insets.lg),
-                    Center(
-                      child: RichText(
-                        text: TextSpan(
-                          text: "Don't have an account? ",
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: 'Register',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () => context.go('/register'),
                             ),
-                          ],
+                          ),
+                          const SizedBox(height: Insets.md),
+                        ],
+                        Form(
+                          key: _formKey,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          child: Column(
+                            children: [
+                              CustomTextField(
+                                label: 'Email',
+                                hintText: 'name@company.com',
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                prefixIcon: Icons.email_outlined,
+                                validator: Validators.validateEmail,
+                              ),
+                              const SizedBox(height: Insets.md),
+                              CustomTextField(
+                                label: 'Password',
+                                hintText: 'Enter your password',
+                                controller: _passwordController,
+                                textInputAction: TextInputAction.done,
+                                prefixIcon: Icons.lock_outline,
+                                validator: Validators.validatePassword,
+                                isPassword: true,
+                                enableObscureToggle: true,
+                              ),
+                              const SizedBox(height: Insets.sm),
+                              Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: Insets.sm,
+                                children: [
+                                  InkWell(
+                                    onTap: () => setState(
+                                      () => _rememberMe = !_rememberMe,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6,
+                                        horizontal: 8,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Checkbox(
+                                            value: _rememberMe,
+                                            onChanged: (value) => setState(
+                                              () =>
+                                                  _rememberMe = value ?? false,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Remember me',
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        context.go('/forgot-password'),
+                                    child: const Text('Forgot password?'),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: Insets.md),
+                              CustomButton(
+                                label: 'Sign In',
+                                isLoading: isLoading,
+                                onPressed: _handleLogin,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: Insets.lg),
+                        Center(
+                          child: RichText(
+                            text: TextSpan(
+                              text: "Don't have an account? ",
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.7,
+                                ),
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Register',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => context.go('/register'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

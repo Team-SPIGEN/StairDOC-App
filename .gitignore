@@ -70,6 +70,15 @@ Podfile.lock
 # Linux
 **/linux/flutter/ephemeral/
 
+# Flutter generated plugin registrants (auto-generated)
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
 # Web
 **/web/favicon.png
 
@@ -129,6 +138,9 @@ dmypy.json
 
 # Databases
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
 *.sqlite
 *.sqlite3
 
@@ -228,3 +240,13 @@ terraform.rc
 # =============================================================================
 *.img
 *.iso
+
+# =============================================================================
+# Root-level platform folders (mobile app is in apps/mobile/)
+# =============================================================================
+/android/
+/ios/
+/macos/
+/linux/
+/windows/
+/web/
